@@ -5,8 +5,8 @@ import os
 # Add project root to sys path to allow running as module
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from app.graph import build_graph
-from app.report import save_report, print_step_summary
+from app.service import run_text_editor_agent
+from app.report import save_report
 
 def main():
     parser = argparse.ArgumentParser(description="AI Text Editor Agent")
@@ -33,38 +33,33 @@ def main():
             print(f"Error reading file: {e}")
             sys.exit(1)
 
-    # Init State
-    initial_state = {
-        "task": args.task,
-        "mode": args.mode,
-        "user_text": user_text,
-        "draft": "",
-        "critique": {},
-        "iteration": 0,
-        "history": [],
-        "max_iterations": args.max_iterations,
-        "quality_passed": False
-    }
-    
     print("\n[START] Initializing Agent...")
-    app = build_graph()
     
-    final_state = app.invoke(initial_state)
+    # Use Service Layer
+    result = run_text_editor_agent(args.task, args.mode, user_text, args.max_iterations)
     
     # Output
     print("\n" + "="*40)
     print("FINAL TEXT")
     print("="*40)
-    print(final_state["draft"])
+    print(result["final_text"])
     print("="*40)
+    print(f"Iterations: {result['iterations']} | Reason: {result['stopped_by']}")
     
     # Save Report
     if args.report:
-        save_report(final_state["history"], args.report)
+        save_report(result["raw_history"], args.report)
         
     if args.verbose:
-        for step in final_state["history"]:
-            print_step_summary(step)
+        # Use refined trace for prettier output
+        for item in result["trace"]:
+             print(f"\n--- Iteration {item['iteration']} ---")
+             print(f"Draft Preview: {item.get('draft', '')[:50]}...")
+             if 'critic' in item:
+                 c = item['critic']
+                 print(f"Critique: Passed={c.get('passed')} Score={c.get('score')}")
+             if 'edited' in item:
+                 print(f"Edited Preview: {item.get('edited', '')[:50]}...")
 
 if __name__ == "__main__":
     main()

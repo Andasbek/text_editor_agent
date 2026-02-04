@@ -58,16 +58,27 @@ if st.button("Run Agent", type="primary"):
                 # Trace
                 if show_trace:
                     st.divider()
-                    st.subheader(" Process Trace")
-                    for i, step in enumerate(result.get("trace", [])):
+                    st.subheader("Process Trace")
+                    for step in result.get("trace", []):
                         with st.expander(f"Iteration {step.get('iteration', '?')}"):
-                            col1, col2 = st.columns(2)
-                            with col1:
-                                st.markdown("**Draft Content**")
+                            # We might have 2 or 3 columns depending on if 'edited' exists
+                            cols = st.columns(3 if 'edited' in step else 2)
+                            
+                            with cols[0]:
+                                st.markdown("**Draft / Content**")
                                 st.code(step.get("draft", ""), language=None)
-                            with col2:
+                            
+                            with cols[1]:
                                 st.markdown("**Critique**")
-                                st.json(step.get("critic", {}))
+                                if 'critic' in step:
+                                    st.json(step['critic'])
+                                else:
+                                    st.info("No critique produced.")
+                            
+                            if 'edited' in step:
+                                with cols[2]:
+                                    st.markdown("**Edited Version**")
+                                    st.code(step['edited'], language=None)
                                 
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")

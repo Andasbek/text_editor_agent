@@ -12,12 +12,12 @@ def get_llm(json_mode: bool = False):
     api_key = os.getenv("OPENAI_API_KEY")
     
     if not api_key:
-        # Fallback or error, but let's assume env is set or passed
-        pass
+        raise ValueError("OPENAI_API_KEY is not set in environment variables. Please check your .env file.")
 
     kwargs = {
         "model": model_name,
-        "temperature": 0.0, # Low temp for reproducibility
+        "temperature": 0.0,
+        "api_key": api_key,
     }
     
     if json_mode:

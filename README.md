@@ -21,6 +21,7 @@ The agent follows a **Writer -> Critic -> Editor** cycle to improve content qual
    ```bash
    export OPENAI_API_KEY="sk-..."
    ```
+   > **Note:** The project will raise a `ValueError` if the API key is not set.
 
 ## Usage
 
