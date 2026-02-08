@@ -28,7 +28,7 @@ def test_run_text_editor_agent_success():
     mock_app.invoke.return_value = mock_final_state
     
     with patch("app.service.build_graph", return_value=mock_app):
-        result = run_text_editor_agent("task", "generate")
+        result = run_text_editor_agent("task", "generate", "")
         
         trace = result["trace"]
         # Cycle 1: Writer(D1) -> Critic(Fail) -> Editor(D2)
@@ -60,5 +60,5 @@ def test_run_text_editor_agent_max_iterations():
     mock_app.invoke.return_value = mock_final_state
     
     with patch("app.service.build_graph", return_value=mock_app):
-        result = run_text_editor_agent("task", "generate")
+        result = run_text_editor_agent("task", "generate", "")
         assert result["stopped_by"] == "max_iterations"
